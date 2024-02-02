@@ -7,19 +7,35 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MediumTopAppBar
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,90 +51,119 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.hide()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        initView()
-    }
-
-    private fun Context.openUrlInBrowser(url: String) {
-        val intent = Intent(Intent.ACTION_VIEW).apply {
-            data = Uri.parse(url)
-        }
-        startActivity(intent)
-    }
-
-    @OptIn(ExperimentalFoundationApi::class)
-    private fun initView() {
-        val items = createItems()
         binding.composeView.setContent {
-            val pager = rememberPagerState { items.size }
-            Scaffold(
-                modifier = Modifier.fillMaxSize(),
-                topBar = {
-                    TopAppBar(title = { Text("Compose Demo") })
-                },
-                floatingActionButton = {
-                    FloatingActionButton(onClick = {
-                        openUrlInBrowser(items[pager.currentPage].siteUrl)
-                    }) {
-                        Icon(imageVector = Icons.Outlined.Info, contentDescription = "Navigate")
-                    }
-                }
+            Material3ScaffoldLibrary()
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    private fun LibraryTopBar(
+        scrollBehavior: TopAppBarScrollBehavior,
+    ) = TopAppBar(
+        title = {
+            Text(
+                text = "Library",
+                textAlign = TextAlign.Start,
+                modifier = Modifier.fillMaxWidth(),
+                color = Color.White
+            )
+        },
+        colors = TopAppBarDefaults.mediumTopAppBarColors(
+            containerColor = Color.Black,
+            scrolledContainerColor = Color.Black,
+        ),
+        scrollBehavior = scrollBehavior,
+    )
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun Material3ScaffoldLibrary(books: List<BookModel> = Books) {
+        val listState = rememberLazyListState()
+        val scrollBehavior =
+            TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+        Scaffold(
+            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+            topBar = { LibraryTopBar(scrollBehavior) }
+        ) { padding ->
+            LazyColumn(
+                modifier = Modifier.padding(padding),
+                state = listState
             ) {
-                HorizontalPager(
-                    state = pager,
-                    modifier = Modifier.padding(it),
-                ) {
-                    Column {
-                        Text(
-                            text = items[it].name,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 50.dp),
-                            textAlign = TextAlign.Center,
-                            fontSize = 20.sp
-                        )
-                        AsyncImage(
-                            model = items[it].imageUrl,
-                            contentDescription = "Android version images",
-                            modifier = Modifier
-                                .fillMaxSize()
-                        )
-                    }
+                items(items = books) { book ->
+                    Book(model = book)
+                    Spacer(modifier = Modifier.height(24.dp))
                 }
             }
         }
     }
-}
 
-data class HorizontalPagerContent(
-    val name: String,
-    val imageUrl: String,
-    val siteUrl: String,
-)
+    data class BookModel(val title: String, val author: String, val pageCount: Int)
 
-fun createItems() = mutableListOf(
-    HorizontalPagerContent(
-        name = "Marshmallow",
-        imageUrl = "https://eitnetworks.net/wp-content/uploads/2016/05/android-6.0-marshmallow-3.jpg",
-        siteUrl = "https://www.android.com/intl/en_in/versions/marshmallow-6-0/"
-    ),
-    HorizontalPagerContent(
-        name = "Oreo",
-        imageUrl = "https://img2.helpnetsecurity.com/posts/android-oreo.jpg",
-        siteUrl = "https://www.android.com/intl/en_in/versions/oreo-8-0/"
-    ),
-    HorizontalPagerContent(
-        name = "Jelly Bean",
-        imageUrl = "https://pakorbit.com/wp-content/uploads/2013/07/android-jelly-bean-face-unlock-648x4321.jpeg",
-        siteUrl = "https://www.android.com/intl/en_in/versions/jelly-bean-4-3/"
-    ),
-    HorizontalPagerContent(
-        name = "Lollipop",
-        imageUrl = "https://e7.pngegg.com/pngimages/758/853/png-clipart-android-lollipop-smartphone-rooting-android-food-lollipop.png",
-        siteUrl = "https://www.android.com/intl/en_in/versions/lollipop-5-0/"
-    ),
-    HorizontalPagerContent(
-        name = "Kitkat",
-        imageUrl = "https://4.bp.blogspot.com/-NoYzgJkUzkI/UnH89i6ZSgI/AAAAAAAACsU/nIOF3laWFLk/s1600/kk-hero.png",
-        siteUrl = "https://www.android.com/intl/en_in/versions/kit-kat-4-4/"
+    private val Books = listOf(
+        BookModel(
+            title = "Tomorrow and Tomorrow and Tomorrow",
+            author = "Gabrielle Zevin",
+            pageCount = 416
+        ),
+        BookModel(title = "Babel", author = "R.F. Kuang", pageCount = 545),
+        BookModel(
+            title = "Tomorrow and Tomorrow and Tomorrow",
+            author = "Gabrielle Zevin",
+            pageCount = 416
+        ),
+        BookModel(title = "Babel", author = "R.F. Kuang", pageCount = 545),
+        BookModel(
+            title = "Tomorrow and Tomorrow and Tomorrow",
+            author = "Gabrielle Zevin",
+            pageCount = 416
+        ),
+        BookModel(title = "Babel", author = "R.F. Kuang", pageCount = 545),
+        BookModel(
+            title = "Tomorrow and Tomorrow and Tomorrow",
+            author = "Gabrielle Zevin",
+            pageCount = 416
+        ),
+        BookModel(title = "Babel", author = "R.F. Kuang", pageCount = 545),
+        BookModel(title = "Babel", author = "R.F. Kuang", pageCount = 545),
+        BookModel(
+            title = "Tomorrow and Tomorrow and Tomorrow",
+            author = "Gabrielle Zevin",
+            pageCount = 416
+        ),
+        BookModel(title = "Babel", author = "R.F. Kuang", pageCount = 545),
+        BookModel(title = "Babel", author = "R.F. Kuang", pageCount = 545),
+        BookModel(
+            title = "Tomorrow and Tomorrow and Tomorrow",
+            author = "Gabrielle Zevin",
+            pageCount = 416
+        ),
+        BookModel(title = "Babel", author = "R.F. Kuang", pageCount = 545),
+        BookModel(title = "Babel", author = "R.F. Kuang", pageCount = 545),
+        BookModel(
+            title = "Tomorrow and Tomorrow and Tomorrow",
+            author = "Gabrielle Zevin",
+            pageCount = 416
+        ),
+        BookModel(title = "Babel", author = "R.F. Kuang", pageCount = 545),
+        BookModel(title = "Babel", author = "R.F. Kuang", pageCount = 545),
+        BookModel(
+            title = "Tomorrow and Tomorrow and Tomorrow",
+            author = "Gabrielle Zevin",
+            pageCount = 416
+        ),
+        BookModel(title = "Babel", author = "R.F. Kuang", pageCount = 545)
     )
-)
+
+    @Composable
+    fun Book(modifier: Modifier = Modifier, model: BookModel) =
+        Card(modifier = modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(model.title)
+                Text(model.author)
+                Text("${model.pageCount} pages")
+            }
+        }
+}

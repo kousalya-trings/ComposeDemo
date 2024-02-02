@@ -12,6 +12,7 @@ constraintlayout = "2.1.4"
 compose = "1.6.0"
 compose-compiler = "1.5.7"
 coil = "2.4.0"
+compose-material3 = "1.1.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -25,6 +26,7 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 androidx-compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compose" }
 androidx-compose-material = { group = "androidx.compose.material", name = "material", version.ref = "compose" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
+compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "compose-material3" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
